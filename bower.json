@@ -1,0 +1,14 @@
+{
+  "name": "monemone",
+  "private": true,
+  "dependencies": {
+    "app-layout": "polymerelements/app-layout#^0.9.0",
+    "audio-context-plus": "toyoshim/AudioContextPlus#^0.4.2",
+    "polymer": "polymer/polymer#^1.4.0",
+    "tp-indicator": "toyoshimer/tp-indicator#^0.1.1",
+    "tp-waveform": "toyoshimer/tp-waveform#^0.1.3"
+  },
+  "devDependencies": {
+    "web-component-tester": "^4.0.0"
+  }
+}

@@ -1,0 +1,119 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/tp-indicator/tp-indicator.html">
+<link rel="import" href="../bower_components/tp-waveform/tp-waveform.html">
+<script src="../bower_components/audio-context-plus/build/acp.min.js"></script>
+
+<dom-module id="autodj-app">
+
+  <template>
+
+    <style>
+      :host {
+        display: block;
+        --app-primary-color: #4285f4;
+        --app-secondary-color: black;
+      }
+      app-header {
+        background-color: var(--app-primary-color);
+        color: #fff;
+      }
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+      ul {
+        padding: 0;
+        list-style: none;
+      }
+      .item {
+        padding: 1px;
+        background-color: white;
+      }
+    </style>
+    <app-header-layout style="width: 100%; height: 90%;">
+      <app-header condenses fixed>
+        <app-toolbar>
+          <div title>もねもねもねね もねもねね</div>
+        </app-toolbar>
+      </app-header>
+      <div id="wave" style="position: relative;">
+        <tp-waveform id="waveL" width=0 height=100></tp-waveform>
+        <tp-waveform id="waveR" width=0 height=100></tp-waveform>
+        <tp-indicator id="indicator" width=0 height=0 style="position: absolute; top: 0;"></tp-indicator>
+      </div>
+    </app-header-layout>
+
+  </template>
+
+  <script>
+    class PhaseOffset extends AudioNodePlus { /* global AudioNodePlus */
+      constructor (length) {
+        super();
+        this.length = length;
+        this.p1 = length / 8 * 7;
+        this.p2 = length / 8 * 8;
+        this.p5 = length / 16 * 11;
+        this.p6 = length / 16 * 12;
+        this.b = length / 64;
+        this.s = (length / 16) | 0;
+        this.t = 0;
+        this.position = 0;
+        this.cos = Math.cos;
+        this.PI = Math.PI;
+      }
+      updateParam () {
+        var offset = 0;
+        if (this.p1 <= this.t && this.t < this.p2) 
+          offset = (512 * this.cos(this.PI * this.t / this.b)) | 0;
+        else if (this.p5 <= this.t && this.t < this.p6)
+          offset -= this.s;
+        this.t = (this.t + 1) % this.length;
+        this.position = (this.t + offset) % this.length;
+        return offset;
+      }
+    }
+    Polymer({ /* global Polymer */
+      is: 'autodj-app',
+      properties: {},
+
+      attached: function () {
+        this._context = new AudioContext(); /* global AudioContext */
+        this._context.loadAudioData('../loops/Loop3.mp3').then(b => {
+          this.$.waveL.set(b.getChannelData(0));
+          this.$.waveR.set(b.getChannelData(1));
+          this._playback = this._context.createBufferPlayback();
+          this._playback.buffer = b;
+          var phase = new PhaseOffset(b.length);
+          phase.connect(this._playback.phaseOffset);
+          this._playback.connect(this._context.destination);
+          this._playback.start();
+
+          var requestAnimationFrame = window.requestAnimationFrame;
+          var update = function () {
+            this.$.indicator.update(0, this._playback.offset / b.length);
+            this.$.indicator.update(1, (this._playback.offset -
+                this._playback.phaseOffset.value) / b.length);
+            requestAnimationFrame(update);
+          }.bind(this);
+          requestAnimationFrame(update);
+        });
+        this.$.indicator.width = this.$.wave.clientWidth;
+        this.$.indicator.height = this.$.wave.clientHeight;
+        this.$.indicator.add({
+          direction: 'vertical',
+          position: 0,
+          color: 'rgb(255, 0, 0)'
+        });
+        this.$.indicator.add({
+          direction: 'vertical',
+          position: 0,
+          color: 'rgb(0, 255, 0)'
+        });
+        this.$.indicator.resize();
+      }
+    });
+  </script>
+
+</dom-module>
