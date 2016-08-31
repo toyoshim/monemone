@@ -1,5 +1,6 @@
 {
   "name": "monemone",
+  "version": "0.0.1",
   "private": true,
   "dependencies": {
     "app-layout": "polymerelements/app-layout#^0.9.0",
