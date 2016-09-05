@@ -184,7 +184,7 @@
           this._maker.data = this._data[this._dataIndex];
           this._maker.onloop = () => {
             this._maker.data = this._data[this._dataIndex];
-            this._updateCanvas();
+            setTimeout(() => { this._updateCanvas(); }, 0);
           };
           this._maker.connect(this._playback.phaseOffset);
           this._playback.connect(this._context.destination);
