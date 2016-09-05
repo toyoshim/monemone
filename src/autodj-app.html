@@ -153,6 +153,7 @@
         window.addEventListener('resize', this._resize.bind(this), false);
         const keyTable = {
           ' ': 0,
+          'z': 0,
           '1': 1,
           '2': 2,
           '3': 3,
@@ -165,10 +166,11 @@
           '0': 10,
           '-': 11,
           '^': 12,
-          '¥': 13
+          '¥': 13,
+          '\\': 13
         };
         window.addEventListener('keydown', e => {
-          if (keyTable[e.key]) {
+          if (keyTable[e.key] !== undefined) {
             this._dataIndex = keyTable[e.key];
           }
         }, false);
